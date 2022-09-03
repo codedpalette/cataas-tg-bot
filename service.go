@@ -42,10 +42,30 @@ func (service *serviceConfig) GetCats(request *CataasRequest) (responses []*Cata
 
 func (service *serviceConfig) getUniqueCats(resultsSize int) (catUrls map[string]string) {
 	start := time.Now()
-	for catUrls = make(map[string]string); len(catUrls) < resultsSize; {
-		cat, err := service.api.GetRandomCat()
-		if err != nil {
-			log.Println("Error when retrieving cat JSON from API", err)
+
+	numWorkers := resultsSize
+	catUrls = make(map[string]string)
+	responses := make(chan *CatJson)
+	done := make(chan bool)
+
+	for i := 0; i < numWorkers; i++ {
+		go func() {
+			for {
+				cat, err := service.api.GetRandomCat()
+				if err != nil {
+					log.Println("Error when retrieving cat JSON from API", err)
+				}
+				select {
+				case <-done:
+					return
+				case responses <- cat:
+				}
+			}
+		}()
+	}
+
+	for cat := range responses {
+		if cat == nil {
 			continue
 		}
 		id, url := cat.Id, cat.Url
@@ -54,7 +74,12 @@ func (service *serviceConfig) getUniqueCats(resultsSize int) (catUrls map[string
 			continue
 		}
 		catUrls[id] = url
+		if len(catUrls) == resultsSize {
+			close(done)
+			break
+		}
 	}
+
 	elapsed := time.Since(start)
 	log.Printf("getUniqueCats took %s", elapsed)
 	return

@@ -60,7 +60,7 @@ func (config *botConfig) handleInlineQuery(query *tgbotapi.InlineQuery, bot *tgb
 	inlineConf := tgbotapi.InlineConfig{
 		InlineQueryID: query.ID,
 		IsPersonal:    true,
-		CacheTime:     0,
+		CacheTime:     1,
 		Results:       results,
 	}
 
