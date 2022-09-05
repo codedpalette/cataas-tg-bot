@@ -13,7 +13,7 @@ import (
 
 const pathCat = "cat"
 const pathSays = "says/%s"
-const defaultTimeout = 5 * time.Second
+const defaultTimeout = 2 * time.Second
 
 type CatJson struct {
 	Id        string   `json:"id"`
