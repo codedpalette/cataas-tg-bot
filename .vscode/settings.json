@@ -1,3 +1,10 @@
 {
-  "cSpell.words": ["autoload", "cataas", "godotenv", "joho", "tgbotapi"]
+  "cSpell.words": [
+    "autoload",
+    "cataas",
+    "errgroup",
+    "godotenv",
+    "joho",
+    "tgbotapi"
+  ]
 }

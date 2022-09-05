@@ -8,10 +8,12 @@ import (
 	"net/url"
 	"path"
 	"strconv"
+	"time"
 )
 
 const pathCat = "cat"
 const pathSays = "says/%s"
+const defaultTimeout = 5 * time.Second
 
 type CatJson struct {
 	Id        string   `json:"id"`
@@ -22,6 +24,7 @@ type CatJson struct {
 
 type cataasAPI struct {
 	baseUrl *url.URL
+	client  *http.Client
 }
 
 type CataasAPI interface {
@@ -36,7 +39,7 @@ func (api *cataasAPI) GetRandomCat() (cat *CatJson, err error) {
 	query.Set("json", "true")
 	uri.RawQuery = query.Encode()
 
-	resp, err := http.Get(uri.String())
+	resp, err := api.client.Get(uri.String())
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +56,6 @@ func (api *cataasAPI) GetRandomCat() (cat *CatJson, err error) {
 	}
 	return
 }
-
 func (api *cataasAPI) BuildUrl(urlPath string, says *string, textSize, width, height *int) *url.URL {
 	uri := *api.baseUrl
 	uri.Path = urlPath
@@ -79,5 +81,8 @@ func CreateAPI() CataasAPI {
 		Host:   "cataas.com",
 		Scheme: "https",
 	}
-	return &cataasAPI{baseUrl}
+	client := http.Client{
+		Timeout: defaultTimeout,
+	}
+	return &cataasAPI{baseUrl, &client}
 }

@@ -36,7 +36,7 @@ func (config *botConfig) Start() {
 	updates := bot.GetUpdatesChan(updateConfig)
 	for update := range updates {
 		if update.InlineQuery != nil {
-			config.handleInlineQuery(update.InlineQuery, bot)
+			go config.handleInlineQuery(update.InlineQuery, bot)
 		}
 	}
 }
@@ -49,12 +49,14 @@ func (config *botConfig) handleInlineQuery(query *tgbotapi.InlineQuery, bot *tgb
 		says = &trim
 	}
 	cataasRequest := CataasRequest{resultsSize, says, textSize, thumbWidth, thumbHeight}
-	cataasResponse := config.service.GetCats(&cataasRequest)
-	for _, response := range cataasResponse {
-		pic := tgbotapi.NewInlineQueryResultPhotoWithThumb(response.id, response.photoUrl.String(), response.thumbUrl.String())
-		pic.Width = 100
-		pic.Height = 100
-		results = append(results, pic)
+	cataasResponse, err := config.service.GetCats(&cataasRequest)
+	if err == nil {
+		for _, response := range cataasResponse {
+			pic := tgbotapi.NewInlineQueryResultPhotoWithThumb(response.id, response.photoUrl.String(), response.thumbUrl.String())
+			pic.Width = 100
+			pic.Height = 100
+			results = append(results, pic)
+		}
 	}
 
 	inlineConf := tgbotapi.InlineConfig{
