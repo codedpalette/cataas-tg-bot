@@ -15,7 +15,6 @@ const textSize = 50
 
 type botConfig struct {
 	token   string
-	env     string
 	service Service
 }
 
@@ -28,7 +27,7 @@ func (config *botConfig) Start() {
 	if err != nil {
 		log.Panic(err)
 	}
-	bot.Debug = strings.ToLower(config.env) != "prod"
+	bot.Debug = true // TODO: Set to false in webhook mode
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	updateConfig := tgbotapi.NewUpdate(0)
@@ -72,5 +71,5 @@ func (config *botConfig) handleInlineQuery(query *tgbotapi.InlineQuery, bot *tgb
 }
 
 func CreateBot(service Service) Bot {
-	return &botConfig{os.Getenv("BOT_TOKEN"), os.Getenv("ENV"), service}
+	return &botConfig{os.Getenv("BOT_TOKEN"), service}
 }

@@ -4,10 +4,22 @@ Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
 
 ## Local dev
 
-1. Copy `app/.env.template` file to `app/.env`
-2. Fill out the variables
-3. `cd app`
-4. Run `go run .`
+> **Note:** In order for VSCode to work you need to setup [Go workspace](https://go.dev/blog/get-familiar-with-workspaces).
+> Run the following commands in the root directory
+>
+> ```bash
+> go work init
+> go work use app
+> ```
+
+1. `cd app`
+2. Create `.env` file with the following content
+
+   ```bash
+   BOT_TOKEN=<TELEGRAM_BOT_TOKEN>
+   ```
+
+3. Run `go run .`
 
 ## Deploy to cloud
 
