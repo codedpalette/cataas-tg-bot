@@ -12,6 +12,8 @@ Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
 
 ### Prerequisites
 
+> See [here](https://dev.to/boodyvo/deploying-go-application-on-aws-with-terraform-849) for more details
+
 1. Install [Terraform](https://www.terraform.io/)
 
     ```bash
@@ -33,3 +35,5 @@ Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
     aws_access_key_id=<ACCESS_KEY>
     aws_secret_access_key=<SECRET_KEY>
     ```
+
+> **Note:** If you change profile name here you need to update it in the `deploy/main.tf` and in subsequent commands as well
