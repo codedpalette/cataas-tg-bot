@@ -14,15 +14,15 @@ Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
 
 > See [here](https://dev.to/boodyvo/deploying-go-application-on-aws-with-terraform-849) for more details
 
-1. Install [Terraform](https://www.terraform.io/)
+1. Install [Terraform](https://www.terraform.io/) and [awscli](https://aws.amazon.com/cli/)
 
     ```bash
-    brew install terraform
+    brew install terraform awscli
     ```
 
 2. Create an AWS account
 3. Create an IAM user to be used by Terraform
-4. Store user's credentials in `~/.aws` directory
+4. Store this user's credentials in `~/.aws` directory
 
     ```bash
     # ~/.aws/config
