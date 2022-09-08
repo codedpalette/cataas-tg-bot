@@ -10,4 +10,26 @@ Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
 
 ## Deploy to cloud
 
-TBD
+### Prerequisites
+
+1. Install [Terraform](https://www.terraform.io/)
+
+    ```bash
+    brew install terraform
+    ```
+
+2. Create an AWS account
+3. Create an IAM user to be used by Terraform
+4. Store user's credentials in `~/.aws` directory
+
+    ```bash
+    # ~/.aws/config
+    [profile cataas-bot]
+    region=us-east-1
+    output=json
+
+    # ~/.aws/credentials
+    [cataas-bot]
+    aws_access_key_id=<ACCESS_KEY>
+    aws_secret_access_key=<SECRET_KEY>
+    ```
