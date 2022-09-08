@@ -1,4 +1,4 @@
-module cataas.com/tg-bot
+module github.com/monkeyroar/cataas-tg-bot
 
 go 1.19
 
