@@ -4,9 +4,10 @@ Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
 
 ## Local dev
 
-1. Copy `.env.template` to `.env` file
+1. Copy `app/.env.template` file to `app/.env`
 2. Fill out the variables
-3. Run `go run .`
+3. `cd app`
+4. Run `go run .`
 
 ## Deploy to cloud
 
