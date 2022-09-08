@@ -1,6 +1,6 @@
 # cataas-tg-bot
 
-Inline Telegram bot for cataas.com website
+Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
 
 ## Local dev
 
