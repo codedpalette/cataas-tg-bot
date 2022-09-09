@@ -21,7 +21,7 @@ Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
 
 3. Run `go run .`
 
-## Deploy to cloud
+## Deploy to AWS
 
 ### Prerequisites
 
@@ -49,4 +49,17 @@ Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
     aws_secret_access_key=<SECRET_KEY>
     ```
 
-> **Note:** If you change profile name here you need to update it in the `deploy/main.tf` and in subsequent commands as well
+> **Note:** If you change profile name here you need to update it in the `deploy/locals.tf` and in subsequent commands as well
+
+### Deployment
+
+> TBD: Bootstrapping Terraform remote state
+
+Run the following commands
+
+```bash
+cd deploy
+echo 'telegram_bot_token = "<BOT_TOKEN>"' > secret.tfvars
+terraform init
+terraform apply -var-file="secret.tfvars"
+```

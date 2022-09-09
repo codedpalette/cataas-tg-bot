@@ -5,6 +5,7 @@
     "errgroup",
     "godotenv",
     "joho",
+    "tfvars",
     "tgbotapi"
   ]
 }
