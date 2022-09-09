@@ -1,7 +1,6 @@
 locals {
   service_name              = "cataas-bot"
+  aws_profile               = "cataas-bot"
   application_port          = "80"
   application_internal_port = "80"
-
-  ecr_url = replace(aws_ecr_repository.ecr.repository_url, "https://", "")
 }

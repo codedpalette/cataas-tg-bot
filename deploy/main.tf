@@ -6,23 +6,16 @@ terraform {
       source  = "hashicorp/aws"
       version = "4.29.0"
     }
-
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "2.21.0"
-    }
   }
 }
 
 provider "aws" {
   region  = "us-east-1"
-  profile = "cataas-bot"
+  profile = local.aws_profile
 
   default_tags {
     tags = {
-      project : "cataas-bot"
+      project : local.service_name
     }
   }
 }
-
-provider "docker" {}

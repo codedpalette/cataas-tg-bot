@@ -26,10 +26,20 @@ data "aws_iam_policy_document" "ecr_iam_policy" {
 }
 
 resource "aws_ecr_repository" "ecr" {
-  name = local.service_name
+  name         = local.service_name
+  force_delete = true
 
   image_scanning_configuration {
     scan_on_push = true
+  }
+
+  provisioner "local-exec" { # Too lazy to setup CI/CD
+    command = templatefile("${path.module}/scripts/build_and_push_docker.sh", {
+      registry_url = split("/", replace(self.repository_url, "https://", ""))[0]
+      repo_name    = self.name
+      profile      = local.aws_profile
+    })
+    working_dir = "${path.module}/../app"
   }
 }
 
@@ -40,20 +50,4 @@ resource "aws_ecr_repository_policy" "ecr_policy" {
 
 data "aws_ecr_authorization_token" "token" {
   registry_id = aws_ecr_repository.ecr.registry_id
-}
-
-resource "docker_registry_image" "cataas-bot-image" {
-  name = "${local.ecr_url}:v1"
-
-  build {
-    context  = "${path.cwd}/../app/."
-    no_cache = true
-    auth_config {
-      host_name = split("/", local.ecr_url)[0]
-      user_name = data.aws_ecr_authorization_token.token.user_name
-      password  = data.aws_ecr_authorization_token.token.password
-    }
-  }
-
-  depends_on = [aws_ecr_repository.ecr]
 }
