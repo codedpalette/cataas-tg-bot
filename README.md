@@ -49,7 +49,7 @@ Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
     aws_secret_access_key=<SECRET_KEY>
     ```
 
-> **Note:** If you change profile name here you need to update it in the `deploy/locals.tf` and in subsequent commands as well
+> **Note:** If you change profile name here you need to update it in the `deploy/main.tf` and in subsequent commands as well
 
 ### Deployment
 

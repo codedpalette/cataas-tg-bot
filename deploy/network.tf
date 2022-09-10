@@ -32,7 +32,7 @@ resource "aws_route_table_association" "main" {
   route_table_id = aws_route_table.public.id
 }
 
-resource "aws_default_network_acl" "main" {
+resource "aws_default_network_acl" "main" { #TODO: Read some guides
   default_network_acl_id = aws_vpc.main.default_network_acl_id
 
   ingress {
@@ -78,7 +78,7 @@ resource "aws_security_group_rule" "allow_ssh" {
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
-resource "aws_security_group_rule" "allow_ingress" { #TODO: Open only for telegram servers
+resource "aws_security_group_rule" "allow_ingress" { #TODO: Open only for API gateway
   description       = "Allow ingress traffic"
   type              = "ingress"
   security_group_id = aws_security_group.public.id

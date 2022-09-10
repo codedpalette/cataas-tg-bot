@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -15,6 +16,7 @@ const textSize = 50
 
 type botConfig struct {
 	token   string
+	webhook string
 	service Service
 }
 
@@ -23,21 +25,63 @@ type Bot interface {
 }
 
 func (config *botConfig) Start() {
+	if config.token == "" {
+		log.Panic("No Telegram token provided")
+	}
 	bot, err := tgbotapi.NewBotAPI(config.token)
 	if err != nil {
 		log.Panic(err)
 	}
-	bot.Debug = true // TODO: Set to false in webhook mode
+	bot.Debug = config.webhook == ""
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	updateConfig := tgbotapi.NewUpdate(0)
-	updateConfig.Timeout = 60
-	updates := bot.GetUpdatesChan(updateConfig)
+	var updates tgbotapi.UpdatesChannel
+	if bot.Debug {
+		updates = startLongPolling(bot)
+	} else {
+		updates = startWebhook(bot, config.webhook)
+	}
+
 	for update := range updates {
+		//TODO: handle /start
 		if update.InlineQuery != nil {
 			go config.handleInlineQuery(update.InlineQuery, bot)
 		}
 	}
+}
+
+func startLongPolling(bot *tgbotapi.BotAPI) tgbotapi.UpdatesChannel {
+	log.Printf("Starting bot in long polling mode")
+	updateConfig := tgbotapi.NewUpdate(0)
+	updateConfig.Timeout = 60
+	return bot.GetUpdatesChan(updateConfig)
+}
+
+func startWebhook(bot *tgbotapi.BotAPI, webhook string) tgbotapi.UpdatesChannel {
+	log.Printf("Starting bot in webhook mode")
+
+	wh, err := tgbotapi.NewWebhook(webhook)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	_, err = bot.Request(wh)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	info, err := bot.GetWebhookInfo()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	if info.LastErrorDate != 0 {
+		log.Printf("Telegram callback failed: %s", info.LastErrorMessage)
+	}
+
+	updates := bot.ListenForWebhook(webhook)
+	go http.ListenAndServe("0.0.0.0:80", nil)
+	return updates
 }
 
 func (config *botConfig) handleInlineQuery(query *tgbotapi.InlineQuery, bot *tgbotapi.BotAPI) {
@@ -71,5 +115,5 @@ func (config *botConfig) handleInlineQuery(query *tgbotapi.InlineQuery, bot *tgb
 }
 
 func CreateBot(service Service) Bot {
-	return &botConfig{os.Getenv("BOT_TOKEN"), service}
+	return &botConfig{os.Getenv("BOT_TOKEN"), os.Getenv("WEBHOOK_URL"), service}
 }
