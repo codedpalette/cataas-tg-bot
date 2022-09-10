@@ -15,7 +15,23 @@ provider "aws" {
 
   default_tags {
     tags = {
-      project : local.service_name
+      Project = local.service_name
     }
   }
+}
+
+variable "telegram_bot_token" {
+  description = "Telegram bot token"
+  type        = string
+  sensitive   = true
+}
+
+locals {
+  service_name = "cataas-bot"
+  aws_profile  = "cataas-bot"
+
+  application_port          = "80"
+  application_internal_port = "80"
+
+  registry_url = split("/", aws_ecr_repository.ecr.repository_url)[0]
 }

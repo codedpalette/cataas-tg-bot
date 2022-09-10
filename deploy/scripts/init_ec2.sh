@@ -1,12 +1,23 @@
 #!/bin/bash
-sudo yum update -y
-sudo amazon-linux-extras install docker
+yum update -y
+amazon-linux-extras install docker
 
-sudo systemctl enable docker
-sudo service docker start
+yum install amazon-ecr-credential-helper -y
+mkdir /home/ec2-user/.docker
+echo '${docker.cred_helpers}' > /home/ec2-user/.docker/config.json
 
-sudo usermod -a -G docker ec2-user
+systemctl enable docker
+service docker start
+
+usermod -a -G docker ec2-user
 newgrp docker
 
-echo ${docker_password} | docker login --username=${docker_user} --password-stdin ${docker_repository}
-docker run --env BOT_TOKEN=${bot_token} -p ${application_port}:${application_internal_port} -d --restart always ${docker_image_name}
+export DOCKER_CONFIG=/home/ec2-user/.docker
+docker run \
+    --log-driver=awslogs \
+    --log-opt awslogs-group=${logs.group_name} \
+    --log-opt awslogs-stream=${logs.stream_name} \
+    --env BOT_TOKEN=${bot_token} \
+    -p ${app.port}:${app.internal_port} \
+    -d --restart always \
+    ${docker.image_name}

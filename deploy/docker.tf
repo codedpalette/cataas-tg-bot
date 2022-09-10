@@ -25,6 +25,34 @@ data "aws_iam_policy_document" "ecr_iam_policy" {
   }
 }
 
+resource "aws_ecr_repository_policy" "ecr_policy" {
+  repository = aws_ecr_repository.ecr.name
+  policy     = data.aws_iam_policy_document.ecr_iam_policy.json
+}
+
+data "aws_iam_policy_document" "ecr_access_policy_document" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetAuthorizationToken"
+    ]
+
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "ecr_access_policy" {
+  name   = "ecr-access-policy"
+  policy = data.aws_iam_policy_document.ecr_access_policy_document.json
+}
+
+resource "aws_iam_policy_attachment" "ecr_access" {
+  name       = "ecr-access"
+  roles      = [aws_iam_role.role.name]
+  policy_arn = aws_iam_policy.ecr_access_policy.arn
+}
+
 resource "aws_ecr_repository" "ecr" {
   name         = local.service_name
   force_delete = true
@@ -32,22 +60,19 @@ resource "aws_ecr_repository" "ecr" {
   image_scanning_configuration {
     scan_on_push = true
   }
+}
+
+resource "null_resource" "ecr_provisioner" {
+  triggers = {
+    ecr_arn = aws_ecr_repository.ecr.arn
+  }
 
   provisioner "local-exec" { # Too lazy to setup CI/CD
     command = templatefile("${path.module}/scripts/build_and_push_docker.sh", {
-      registry_url = split("/", replace(self.repository_url, "https://", ""))[0]
-      repo_name    = self.name
+      registry_url = local.registry_url
+      repo_name    = aws_ecr_repository.ecr.name
       profile      = local.aws_profile
     })
     working_dir = "${path.module}/../app"
   }
-}
-
-resource "aws_ecr_repository_policy" "ecr_policy" {
-  repository = aws_ecr_repository.ecr.name
-  policy     = data.aws_iam_policy_document.ecr_iam_policy.json
-}
-
-data "aws_ecr_authorization_token" "token" {
-  registry_id = aws_ecr_repository.ecr.registry_id
 }
