@@ -32,35 +32,6 @@ resource "aws_route_table_association" "main" {
   route_table_id = aws_route_table.public.id
 }
 
-resource "aws_security_group" "public" {
-  name   = "public-sg"
-  vpc_id = aws_vpc.main.id
-
-  ingress {
-    from_port = local.application_port
-    to_port   = local.application_port
-    protocol  = "tcp"
-
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
-
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
 resource "aws_default_network_acl" "main" {
   default_network_acl_id = aws_vpc.main.default_network_acl_id
 
@@ -81,9 +52,48 @@ resource "aws_default_network_acl" "main" {
     from_port  = 0
     to_port    = 0
   }
+
+  lifecycle {
+    ignore_changes = [subnet_ids]
+  }
 }
 
 resource "aws_network_acl_association" "main" {
   network_acl_id = aws_default_network_acl.main.id
   subnet_id      = aws_subnet.main.id
+}
+
+resource "aws_security_group" "public" {
+  name   = "public-sg"
+  vpc_id = aws_vpc.main.id
+}
+
+resource "aws_security_group_rule" "allow_ssh" {
+  description       = "Allow SSH traffic (for EC2 Instance Connect)"
+  type              = "ingress"
+  security_group_id = aws_security_group.public.id
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "allow_ingress" { #TODO: Open only for telegram servers
+  description       = "Allow ingress traffic"
+  type              = "ingress"
+  security_group_id = aws_security_group.public.id
+  from_port         = local.application_port
+  to_port           = local.application_port
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "allow_egress" { #TODO: Open only to telegram servers and ECR
+  description       = "Allow egress traffic"
+  type              = "egress"
+  security_group_id = aws_security_group.public.id
+  from_port         = 0
+  to_port           = 0
+  protocol          = "all"
+  cidr_blocks       = ["0.0.0.0/0"]
 }
