@@ -34,12 +34,11 @@ resource "aws_iam_instance_profile" "profile" {
 }
 
 resource "aws_instance" "app_server" {
-  ami                         = data.aws_ami.amzn2.id
-  instance_type               = "t2.micro"
-  vpc_security_group_ids      = [aws_security_group.public.id]
-  subnet_id                   = aws_subnet.main.id
-  associate_public_ip_address = true #TODO: Is it necessary?
-  iam_instance_profile        = aws_iam_instance_profile.profile.name
+  ami                    = data.aws_ami.amzn2.id
+  instance_type          = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.public.id]
+  subnet_id              = aws_subnet.main.id  
+  iam_instance_profile = aws_iam_instance_profile.profile.name
 
   user_data = templatefile("${path.module}/scripts/init_ec2.sh", {
     docker = {
