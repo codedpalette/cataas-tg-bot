@@ -44,12 +44,8 @@ func (config *botConfig) Start() {
 
 	for update := range updates {
 		if update.Message != nil {
-			// TODO: Return message that bot works only in inline mode
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-			msg.ReplyToMessageID = update.Message.MessageID
-
+			msgText := "This bot works only in inline mode"
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
 			bot.Send(msg)
 		}
 		if update.InlineQuery != nil {

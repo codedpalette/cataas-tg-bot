@@ -88,17 +88,7 @@ resource "aws_security_group" "ec2-sg" {
   vpc_id      = aws_vpc.main.id
 }
 
-resource "aws_security_group_rule" "allow_ssh" { #TODO: Can't use EC2 Instance Connect without public IP
-  description       = "Allow SSH traffic (for EC2 Instance Connect)"
-  type              = "ingress"
-  security_group_id = aws_security_group.ec2-sg.id
-  from_port         = 22
-  to_port           = 22
-  protocol          = "tcp"
-  cidr_blocks       = ["18.206.107.24/29"]
-}
-
-resource "aws_security_group_rule" "allow_ingress" { #TODO: allow only 149.154.160.0/20 and 91.108.4.0/22
+resource "aws_security_group_rule" "allow_ingress" {
   description       = "Allow ingress traffic"
   type              = "ingress"
   security_group_id = aws_security_group.ec2-sg.id
