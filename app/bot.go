@@ -43,7 +43,15 @@ func (config *botConfig) Start() {
 	}
 
 	for update := range updates {
-		//TODO: handle /start
+		if update.Message != nil {
+			// TODO: Return message that bot works only in inline mode
+			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			msg.ReplyToMessageID = update.Message.MessageID
+
+			bot.Send(msg)
+		}
 		if update.InlineQuery != nil {
 			go config.handleInlineQuery(update.InlineQuery, bot)
 		}
@@ -59,6 +67,7 @@ func startLongPolling(bot *tgbotapi.BotAPI) tgbotapi.UpdatesChannel {
 
 func startWebhook(bot *tgbotapi.BotAPI, webhook string) tgbotapi.UpdatesChannel {
 	log.Printf("Starting bot in webhook mode")
+	log.Printf("Webhook URL: %s", webhook)
 
 	wh, err := tgbotapi.NewWebhook(webhook)
 	if err != nil {
@@ -79,7 +88,7 @@ func startWebhook(bot *tgbotapi.BotAPI, webhook string) tgbotapi.UpdatesChannel 
 		log.Printf("Telegram callback failed: %s", info.LastErrorMessage)
 	}
 
-	updates := bot.ListenForWebhook(webhook)
+	updates := bot.ListenForWebhook("/")
 	go http.ListenAndServe("0.0.0.0:80", nil)
 	return updates
 }

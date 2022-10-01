@@ -64,7 +64,8 @@ resource "aws_ecr_repository" "ecr" {
 
 resource "null_resource" "ecr_provisioner" {
   triggers = {
-    ecr_arn = aws_ecr_repository.ecr.arn
+    ecr_arn  = aws_ecr_repository.ecr.arn
+    dir_sha1 = sha1(join("", [for f in fileset(path.module, "../app/**.go") : filesha1(f)]))
   }
 
   provisioner "local-exec" { # Too lazy to setup CI/CD

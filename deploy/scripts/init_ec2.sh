@@ -18,6 +18,5 @@ docker run \
     --log-opt awslogs-group=${logs.group_name} \
     --log-opt awslogs-stream=${logs.stream_name} \
     --env BOT_TOKEN=${bot_token} \
-    -p ${app.port}:${app.internal_port} \
-    -d --restart always \
-    ${docker.image_name}
+    --env WEBHOOK_URL=${webhook_url} \
+    -p 80:80 -d --restart always ${docker.image_name}
