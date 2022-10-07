@@ -37,7 +37,7 @@ resource "aws_instance" "app_server" {
   ami                    = data.aws_ami.amzn2.id
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.ec2-sg.id]
-  subnet_id              = aws_subnet.private-us-east-1a.id
+  subnet_id              = aws_subnet.public-us-east-1a.id
   iam_instance_profile   = aws_iam_instance_profile.profile.name
 
   user_data = templatefile("${path.module}/scripts/init_ec2.sh", {

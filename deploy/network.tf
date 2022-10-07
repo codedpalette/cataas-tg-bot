@@ -6,56 +6,14 @@ resource "aws_internet_gateway" "gateway" {
   vpc_id = aws_vpc.main.id
 }
 
-resource "aws_subnet" "private-us-east-1a" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.0.0/21"
-  availability_zone = "us-east-1a"
-
-  tags = {
-    "Name" = "private-us-east-1a"
-  }
-}
-
 resource "aws_subnet" "public-us-east-1a" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.8.0/21"
+  cidr_block              = "10.0.0.0/21"
   availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
 
   tags = {
     "Name" = "public-us-east-1a"
-  }
-}
-
-resource "aws_eip" "nat" {
-  vpc = true
-
-  tags = {
-    Name = "NAT"
-  }
-}
-
-resource "aws_nat_gateway" "nat" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public-us-east-1a.id
-
-  tags = {
-    Name = "NAT"
-  }
-
-  depends_on = [aws_internet_gateway.gateway]
-}
-
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat.id
-  }
-
-  tags = {
-    Name = "private"
   }
 }
 
@@ -72,11 +30,6 @@ resource "aws_route_table" "public" {
   }
 }
 
-resource "aws_route_table_association" "private-us-east-1a" {
-  subnet_id      = aws_subnet.private-us-east-1a.id
-  route_table_id = aws_route_table.private.id
-}
-
 resource "aws_route_table_association" "public-us-east-1a" {
   subnet_id      = aws_subnet.public-us-east-1a.id
   route_table_id = aws_route_table.public.id
@@ -88,6 +41,8 @@ resource "aws_security_group" "ec2-sg" {
   vpc_id      = aws_vpc.main.id
 }
 
+# TODO: Allow ssh from ec2 connect
+
 resource "aws_security_group_rule" "allow_ingress" {
   description       = "Allow ingress traffic"
   type              = "ingress"
@@ -95,7 +50,7 @@ resource "aws_security_group_rule" "allow_ingress" {
   from_port         = 80
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks       = [aws_vpc.main.cidr_block]
+  cidr_blocks       = ["0.0.0.0/0"] # TODO: Only API Gateway / Telegram servers
 }
 
 resource "aws_security_group_rule" "allow_egress" {

@@ -105,6 +105,8 @@ func (config *botConfig) handleInlineQuery(query *tgbotapi.InlineQuery, bot *tgb
 			pic.Height = 100
 			results = append(results, pic)
 		}
+	} else {
+		// TODO: error handling
 	}
 
 	inlineConf := tgbotapi.InlineConfig{
