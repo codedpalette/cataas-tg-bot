@@ -106,7 +106,8 @@ func (config *botConfig) handleInlineQuery(query *tgbotapi.InlineQuery, bot *tgb
 			results = append(results, pic)
 		}
 	} else {
-		// TODO: error handling
+		errorMsg := tgbotapi.NewInlineQueryResultArticle("1", "Error", err.Error())
+		results = append(results, errorMsg)
 	}
 
 	inlineConf := tgbotapi.InlineConfig{

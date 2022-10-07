@@ -41,7 +41,15 @@ resource "aws_security_group" "ec2-sg" {
   vpc_id      = aws_vpc.main.id
 }
 
-# TODO: Allow ssh from ec2 connect
+resource "aws_security_group_rule" "allow_ssh" {
+  description       = "Allow ssh (only for EC2 Instance Connect)"
+  type              = "ingress"
+  security_group_id = aws_security_group.ec2-sg.id
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = local.ec2_instance_connect_cidr
+}
 
 resource "aws_security_group_rule" "allow_ingress" {
   description       = "Allow ingress traffic"
@@ -50,7 +58,7 @@ resource "aws_security_group_rule" "allow_ingress" {
   from_port         = 80
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"] # TODO: Only API Gateway / Telegram servers
+  cidr_blocks       = local.api_gateway_cidr
 }
 
 resource "aws_security_group_rule" "allow_egress" {
