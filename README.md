@@ -27,10 +27,10 @@ Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
 
 > See [here](https://dev.to/boodyvo/deploying-go-application-on-aws-with-terraform-849) for more details
 
-1. Install [Terraform](https://www.terraform.io/) and [awscli](https://aws.amazon.com/cli/)
+1. Install [Terraform](https://www.terraform.io/), [awscli](https://aws.amazon.com/cli/) and [terragrunt](https://terragrunt.gruntwork.io/)
 
     ```bash
-    brew install terraform awscli
+    brew install terraform awscli terragrunt
     ```
 
 2. Create an AWS account
@@ -53,13 +53,11 @@ Inline Telegram bot for [CATaaS](https://cataas.com/) REST API
 
 ### Deployment
 
-> TBD: Bootstrapping Terraform remote state
-
 Run the following commands
 
 ```bash
 cd deploy
 echo 'telegram_bot_token = "<BOT_TOKEN>"' > secret.tfvars
-terraform init
-terraform apply -var-file="secret.tfvars"
+terragrunt init
+terragrunt apply -var-file="secret.tfvars"
 ```
