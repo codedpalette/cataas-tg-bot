@@ -13,13 +13,14 @@ import (
 
 const pathCat = "cat"
 const pathSays = "says/%s"
-const defaultTimeout = 2 * time.Second
+const defaultTimeout = 5 * time.Second
 
 type CatJson struct {
-	Id        string   `json:"id"`
+	Id        string   `json:"_id"`
 	CreatedAt string   `json:"created_at"`
 	Tags      []string `json:"tags"`
 	Url       string   `json:"url"`
+	MimeType  string   `json:"mimetype"`
 }
 
 type cataasAPI struct {

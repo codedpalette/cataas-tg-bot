@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/url"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -20,10 +21,18 @@ type CataasRequest struct {
 	thumbHeight int
 }
 
+type PhotoType int32
+
+const (
+	Image PhotoType = iota
+	Gif
+)
+
 type CataasResponse struct {
-	id       string
-	photoUrl *url.URL
-	thumbUrl *url.URL
+	id        string
+	photoUrl  *url.URL
+	thumbUrl  *url.URL
+	photoType PhotoType
 }
 
 type serviceConfig struct {
@@ -36,14 +45,21 @@ type Service interface {
 
 func (service *serviceConfig) GetCats(request *CataasRequest) ([]*CataasResponse, error) {
 	responses := make([]*CataasResponse, 0, request.resultsSize)
-	catUrls, err := service.getUniqueCats(request.resultsSize)
+	catJsons, err := service.getUniqueCats(request.resultsSize)
 	if err != nil {
 		return nil, err
 	}
-	for id, url := range catUrls {
+	for id, cat := range catJsons {
+		url := cat.Url
 		photoUrl := service.api.BuildUrl(url, request.says, &request.textSize, nil, nil)
 		thumbUrl := service.api.BuildUrl(url, request.says, nil, &request.thumbWidth, &request.thumbHeight)
-		response := &CataasResponse{id, photoUrl, thumbUrl}
+		var photoType PhotoType
+		if strings.Contains(cat.MimeType, "gif") {
+			photoType = Gif
+		} else {
+			photoType = Image
+		}
+		response := &CataasResponse{id, photoUrl, thumbUrl, photoType}
 		responses = append(responses, response)
 	}
 	return responses, nil
@@ -73,11 +89,11 @@ func apiWorker(ctx context.Context, api CataasAPI, responses *chan *CatJson, don
 	}
 }
 
-func (service *serviceConfig) getUniqueCats(resultsSize int) (map[string]string, error) {
+func (service *serviceConfig) getUniqueCats(resultsSize int) (map[string]*CatJson, error) {
 	start := time.Now()
 
 	var errorCount int32 = 0
-	catUrls := make(map[string]string)
+	catUrls := make(map[string]*CatJson)
 	responses := make(chan *CatJson, resultsSize)
 	done := make(chan struct{})
 	g, ctx := errgroup.WithContext(context.Background())
@@ -88,12 +104,11 @@ func (service *serviceConfig) getUniqueCats(resultsSize int) (map[string]string,
 
 	go func() {
 		for cat := range responses {
-			id, url := cat.Id, cat.Url
-			_, exists := catUrls[id]
+			_, exists := catUrls[cat.Id]
 			if exists {
 				continue
 			}
-			catUrls[id] = url
+			catUrls[cat.Id] = cat
 			if len(catUrls) == resultsSize {
 				close(done)
 				return

@@ -1,12 +1,14 @@
-FROM golang:1.19-alpine
+FROM --platform=$BUILDPLATFORM golang:1.19 as builder
+
+ARG TARGETARCH
 
 WORKDIR /usr/src/app
-
-# pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
 COPY ../go.mod ../go.sum ./
 RUN go mod download && go mod verify
-
 COPY ../*.go .
-RUN go build -v -o /usr/local/bin/app ./...
+RUN GOOS=linux GOARCH=$TARGETARCH go build -v -o /usr/local/bin/app ./...
 
-CMD ["app"]
+FROM alpine:latest
+WORKDIR /root
+COPY --from=builder /usr/local/bin/app .
+CMD /root/app

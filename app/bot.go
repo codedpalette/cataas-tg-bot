@@ -43,6 +43,7 @@ func (config *botConfig) Start() {
 	}
 
 	for update := range updates {
+		log.Printf("Got update: %+v", update)
 		if update.Message != nil {
 			msgText := "This bot works only in inline mode"
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
@@ -100,9 +101,20 @@ func (config *botConfig) handleInlineQuery(query *tgbotapi.InlineQuery, bot *tgb
 	cataasResponse, err := config.service.GetCats(&cataasRequest)
 	if err == nil {
 		for _, response := range cataasResponse {
-			pic := tgbotapi.NewInlineQueryResultPhotoWithThumb(response.id, response.photoUrl.String(), response.thumbUrl.String())
-			pic.Width = 100
-			pic.Height = 100
+			var pic interface{}
+			switch response.photoType {
+			case Image:
+				img := tgbotapi.NewInlineQueryResultPhotoWithThumb(response.id, response.photoUrl.String(), response.thumbUrl.String())
+				img.Width = thumbWidth
+				img.Height = thumbHeight
+				pic = img
+			case Gif:
+				gif := tgbotapi.NewInlineQueryResultGIF(response.id, response.photoUrl.String())
+				gif.ThumbURL = response.thumbUrl.String()
+				gif.Width = thumbWidth
+				gif.Height = thumbHeight
+				pic = gif
+			}
 			results = append(results, pic)
 		}
 	} else {
